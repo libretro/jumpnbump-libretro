@@ -15,7 +15,7 @@ char *message[] = {
 	"Linux port by Chuck Mason.",
 	"New SDL port by Florian Schulze.",
 	"Port to SDL2 by Come Chilliet.",
-    "Port to Libretro by Philippe Simons."
+    "Port to Libretro by Philippe Simons.",
 	"http://www.icculus.org/jumpnbump/",
 	"Ryan C. Gordon made networking possible again!",
 	"Visit our homepage at:",
