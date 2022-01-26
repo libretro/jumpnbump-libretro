@@ -38,13 +38,11 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 
 void retro_init(void)
 {
-   debug_print("\n","");
    frame_buf = calloc(VIDEO_PIXELS, sizeof(uint32_t));
 }
 
 void retro_deinit(void)
 {
-   debug_print("\n","");
    free(frame_buf);
    frame_buf = NULL;
 }
@@ -56,8 +54,6 @@ unsigned retro_api_version(void)
 
 void retro_set_controller_port_device(unsigned port, unsigned device)
 {
-   debug_print("\n","");
-
    if (port >= 4)
       return;
 
@@ -66,8 +62,6 @@ void retro_set_controller_port_device(unsigned port, unsigned device)
 
 void retro_get_system_info(struct retro_system_info *info)
 {
-   debug_print("\n","");
-
    memset(info, 0, sizeof(*info));
    info->library_name     = "Jump 'n Bump";
    info->library_version  = "0.1";
@@ -77,8 +71,6 @@ void retro_get_system_info(struct retro_system_info *info)
 
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
-   debug_print("\n","");
-
    info->geometry.base_width   = JNB_WIDTH;
    info->geometry.base_height  = JNB_HEIGHT;
    info->geometry.max_width    = JNB_WIDTH;
@@ -135,25 +127,21 @@ void retro_set_audio_sample(retro_audio_sample_t cb) { }
 
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 {
-   debug_print("cb=%p\n", cb);
    audio_batch_cb = cb;
 }
 
 void retro_set_input_poll(retro_input_poll_t cb)
 {
-   debug_print("cb=%p\n", cb);
    input_poll_cb = cb;
 }
 
 void retro_set_input_state(retro_input_state_t cb)
 {
-   debug_print("cb=%p\n", cb);
    input_state_cb = cb;
 }
 
 void retro_set_video_refresh(retro_video_refresh_t cb)
 {
-   debug_print("cb=%p\n", cb);
    video_cb = cb;
 }
 
