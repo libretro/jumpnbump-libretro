@@ -30,8 +30,3 @@ void update_player_actions(void)
 {
 
 }
-
-void init_inputs(void)
-{
-
-}

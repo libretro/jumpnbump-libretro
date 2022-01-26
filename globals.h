@@ -248,7 +248,6 @@ int dat_filelen(char *file_name);
 /* input.c */
 
 void update_player_actions(void);
-void init_inputs(void);
 
 /* menu.c */
 
@@ -284,14 +283,6 @@ void register_background(unsigned char *pixels, char pal[768]);
 int register_gob(unsigned char *handle, gob_t *gob, int len);
 void register_mask(void *pixels);
 
-/* gfx.c */
-
-#ifdef USE_SDL
-/* long filelength(int handle); */
-void fs_toggle();
-int intr_sysupdate();
-#endif
-
 /* interrpt.c */
 
 extern char last_keys[50];
@@ -301,11 +292,6 @@ void remove_keyb_handler(void);
 int key_pressed(int key);
 int addkey(unsigned int key);
 
-/* sound-linux.c */
-#ifdef LINUX
-
-
-#endif
 
 #ifdef __cplusplus
 }

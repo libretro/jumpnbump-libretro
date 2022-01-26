@@ -63,8 +63,3 @@ int key_pressed(int key)
 {
 	return keyb[(unsigned char) key];
 }
-
-int intr_sysupdate()
-{
-	return 1;
-}

@@ -437,8 +437,6 @@ all provided the user didn't choose one on the commandline. */
 
 	setpalette(0, 256, pal);
 
-	init_inputs();
-
 	for(c1 = 0; c1 < JNB_MAX_PLAYERS; c1++)		// reset player values
     {
 		ai[c1] = 0;
