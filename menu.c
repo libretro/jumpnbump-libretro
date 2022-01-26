@@ -44,7 +44,6 @@ int mod_vol = 0, mod_fade_direction = 0;
 int fade_dir, fade_count;
 char fade_pal[48];
 int cur_message;
-int esc_pressed;
 int end_loop_flag, new_game_flag, fade_flag;
 
 int menu_init(void)
@@ -136,7 +135,6 @@ int menu_init(void)
 	main_info.view_page = 0;
 	main_info.draw_page = 1;
 
-	esc_pressed = 0;
 	end_loop_flag = new_game_flag = 0;
 
 	return 0;
@@ -145,15 +143,6 @@ int menu_init(void)
 int menu_frame()
 {
     int c1;
-
-	if (key_pressed(1) == 1 && esc_pressed == 0) {
-		end_loop_flag = 1;
-		new_game_flag = 0;
-		memset(menu_pal, 0, 768);
-		mod_fade_direction = 0;
-        esc_pressed = 1;
-	} else if (key_pressed(1) == 0)
-		esc_pressed = 0;
     
     for (c1 = 0; c1 < JNB_MAX_PLAYERS; c1++) {
         if (end_loop_flag == 1 && new_game_flag == 1) {
