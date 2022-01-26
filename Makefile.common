@@ -1,0 +1,9 @@
+CFLAGS      += -Dstricmp=strcasecmp -Dstrnicmp=strncasecmp
+SOURCES_C   := $(CORE_DIR)/libretro.c \
+                $(CORE_DIR)/gfx.c \
+                $(CORE_DIR)/interrpt.c \
+                $(CORE_DIR)/main.c \
+                $(CORE_DIR)/network.c \
+                $(CORE_DIR)/input.c \
+                $(CORE_DIR)/dj.c \
+                $(CORE_DIR)/menu.c
