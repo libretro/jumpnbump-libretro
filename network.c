@@ -27,7 +27,6 @@
 
 #include "network.h"
 
-static int buggered_off = 0;
 int is_server = 1;
 int is_net = 0;
 int server_said_bye = 0;

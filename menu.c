@@ -136,7 +136,7 @@ int menu_init(void)
 	main_info.view_page = 0;
 	main_info.draw_page = 1;
 
-	esc_pressed = key_pressed(1);
+	esc_pressed = 0;
 	end_loop_flag = new_game_flag = 0;
 
 	return 0;
@@ -151,6 +151,7 @@ int menu_frame()
 		new_game_flag = 0;
 		memset(menu_pal, 0, 768);
 		mod_fade_direction = 0;
+        esc_pressed = 1;
 	} else if (key_pressed(1) == 0)
 		esc_pressed = 0;
     
@@ -555,6 +556,8 @@ int menu_frame()
     draw_begin();
     redraw_pob_backgrounds(main_info.draw_page);
     draw_end();
+
+    return 0;
 }
 
 void menu_deinit(void)
