@@ -189,6 +189,8 @@ struct {
 	} page[2];
 } leftovers;
 
+int client_player_num = -1;
+
 int add_leftovers(int page, int x, int y, int image, gob_t *pob_data)
 {
 

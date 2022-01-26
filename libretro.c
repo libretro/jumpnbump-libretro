@@ -91,32 +91,17 @@ void retro_set_environment(retro_environment_t cb)
    else
       log_cb = fallback_log;
       
-   static const struct retro_controller_description port1[] = {
-      { "Auto", RETRO_DEVICE_JOYPAD },
-      { "Gamepad", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0) },
-      { NULL, 0 },
-   };
-   static const struct retro_controller_description port2[] = {
-      { "Auto", RETRO_DEVICE_JOYPAD },
-      { "Gamepad", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0) },
-      { NULL, 0 },
-   };
-   static const struct retro_controller_description port3[] = {
-      { "Auto", RETRO_DEVICE_JOYPAD },
-      { "Gamepad", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0) },
-      { NULL, 0 },
-   };
-   static const struct retro_controller_description port4[] = {
+   static const struct retro_controller_description controllers[] = {
       { "Auto", RETRO_DEVICE_JOYPAD },
       { "Gamepad", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0) },
       { NULL, 0 },
    };
 
    static const struct retro_controller_info ports[] = {
-      { port1, 2 },
-      { port2, 2 },
-      { port3, 2 },
-      { port4, 2 },
+      { controllers, 2 },
+      { controllers, 2 },
+      { controllers, 2 },
+      { controllers, 2 },
       { NULL, 0 },
    };
 
@@ -152,6 +137,24 @@ void retro_reset(void)
 
 static void update_input(void)
 {
+   input_poll_cb();
+
+   addkey((KEY_PL1_LEFT & 0x7fff) | (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) ? 0x0 : 0x8000));
+   addkey((KEY_PL1_RIGHT & 0x7fff) | (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT) ? 0x0 : 0x8000));
+   addkey((KEY_PL1_JUMP & 0x7fff) | (input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A) ? 0x0 : 0x8000));
+
+   addkey((KEY_PL2_LEFT & 0x7fff) | (input_state_cb(1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) ? 0x0 : 0x8000));
+   addkey((KEY_PL2_RIGHT & 0x7fff) | (input_state_cb(1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT) ? 0x0 : 0x8000));
+   addkey((KEY_PL2_JUMP & 0x7fff) | (input_state_cb(1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A) ? 0x0 : 0x8000));
+
+   addkey((KEY_PL3_LEFT & 0x7fff) | (input_state_cb(2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) ? 0x0 : 0x8000));
+   addkey((KEY_PL3_RIGHT & 0x7fff) | (input_state_cb(2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT) ? 0x0 : 0x8000));
+   addkey((KEY_PL3_JUMP & 0x7fff) | (input_state_cb(2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A) ? 0x0 : 0x8000));
+
+   addkey((KEY_PL4_LEFT & 0x7fff) | (input_state_cb(3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) ? 0x0 : 0x8000));
+   addkey((KEY_PL4_RIGHT & 0x7fff) | (input_state_cb(3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT) ? 0x0 : 0x8000));
+   addkey((KEY_PL4_JUMP & 0x7fff) | (input_state_cb(3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A) ? 0x0 : 0x8000));
+
 	update_player_actions();
 }
 
