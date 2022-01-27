@@ -156,38 +156,59 @@ void retro_reset(void)
 
 static void update_digital_controller(int port)
 {
+   int left, right, jump;
+
    if (supports_input_bitmasks)
    {
       const int16_t active = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
-      addkey(((KEY_PL1_LEFT + 0x10 * port) & 0x7fff) | (active & (1 << RETRO_DEVICE_ID_JOYPAD_LEFT) ? 0x0 : 0x8000));
-      addkey(((KEY_PL1_RIGHT + 0x10 * port) & 0x7fff) | (active & (1 << RETRO_DEVICE_ID_JOYPAD_RIGHT) ? 0x0 : 0x8000));
-      addkey(((KEY_PL1_JUMP + 0x10 * port) & 0x7fff) | (active & (1 << RETRO_DEVICE_ID_JOYPAD_A) ? 0x0 : 0x8000));
+      left = (active & (1 << RETRO_DEVICE_ID_JOYPAD_LEFT));
+      right = (active & (1 << RETRO_DEVICE_ID_JOYPAD_RIGHT));
+      jump = (active & (1 << RETRO_DEVICE_ID_JOYPAD_A));
    }
    else
    {
-      addkey(((KEY_PL1_LEFT + 0x10 * port) & 0x7fff) | (input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) ? 0x0 : 0x8000));
-      addkey(((KEY_PL1_RIGHT + 0x10 * port) & 0x7fff) | (input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT) ? 0x0 : 0x8000));
-      addkey(((KEY_PL1_JUMP + 0x10 * port) & 0x7fff) | (input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A) ? 0x0 : 0x8000));
+      left = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT);
+      right = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT);
+      jump = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
    }
+
+   addkey(((KEY_PL1_LEFT + 0x10 * port) & 0x7fff) | ((left != 0) ? 0x0 : 0x8000));
+   addkey(((KEY_PL1_RIGHT + 0x10 * port) & 0x7fff) | ((right != 0) ? 0x0 : 0x8000));
+   addkey(((KEY_PL1_JUMP + 0x10 * port) & 0x7fff) | ((jump != 0) ? 0x0 : 0x8000));
 }
 
 static void update_analog_controller(int port)
 {
+   int left, right, jump;
+
+   const int16_t left_axis_x = input_state_cb(port, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X);
+
+   if (left_axis_x != 0) { // TODO add dead-zone ?
+      right = left_axis_x > 0;
+      left = left_axis_x < 0;
+   }
+
    if (supports_input_bitmasks)
    {
       const int16_t active = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
-      addkey(((KEY_PL1_LEFT + 0x10 * port) & 0x7fff) | (active & (1 << RETRO_DEVICE_ID_JOYPAD_LEFT) ? 0x0 : 0x8000));
-      addkey(((KEY_PL1_RIGHT + 0x10 * port) & 0x7fff) | (active & (1 << RETRO_DEVICE_ID_JOYPAD_RIGHT) ? 0x0 : 0x8000));
-      addkey(((KEY_PL1_JUMP + 0x10 * port) & 0x7fff) | (active & (1 << RETRO_DEVICE_ID_JOYPAD_A) ? 0x0 : 0x8000));
+      if (left_axis_x == 0) {
+         left = (active & (1 << RETRO_DEVICE_ID_JOYPAD_LEFT));
+         right = (active & (1 << RETRO_DEVICE_ID_JOYPAD_RIGHT));
+      }
+      jump = (active & (1 << RETRO_DEVICE_ID_JOYPAD_A));
    }
    else
    {
-      addkey(((KEY_PL1_LEFT + 0x10 * port) & 0x7fff) | (input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT) ? 0x0 : 0x8000));
-      addkey(((KEY_PL1_RIGHT + 0x10 * port) & 0x7fff) | (input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT) ? 0x0 : 0x8000));
-      addkey(((KEY_PL1_JUMP + 0x10 * port) & 0x7fff) | (input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A) ? 0x0 : 0x8000));
+      if (left_axis_x == 0) {
+         left = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT);
+         right = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT);
+      }
+      jump = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
    }
 
-   // TODO check left X axis
+   addkey(((KEY_PL1_LEFT + 0x10 * port) & 0x7fff) | ((left != 0) ? 0x0 : 0x8000));
+   addkey(((KEY_PL1_RIGHT + 0x10 * port) & 0x7fff) | ((right != 0) ? 0x0 : 0x8000));
+   addkey(((KEY_PL1_JUMP + 0x10 * port) & 0x7fff) | ((jump != 0) ? 0x0 : 0x8000));
 }
 
 static void update_input(void)
