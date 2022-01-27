@@ -13,8 +13,6 @@
 
 #include "globals.h"
 
-#define VIDEO_PIXELS JNB_WIDTH * JNB_HEIGHT
-
 uint32_t *frame_buf;
 
 static struct retro_log_callback logging;
@@ -40,7 +38,7 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 
 void retro_init(void)
 {
-   frame_buf = calloc(VIDEO_PIXELS, sizeof(uint32_t));
+   frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint32_t));
 
    unsigned dummy = 0;
    supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, &dummy);
