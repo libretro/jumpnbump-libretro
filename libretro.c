@@ -13,6 +13,10 @@
 
 #include "globals.h"
 
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
 uint32_t *frame_buf;
 
 static struct retro_log_callback logging;
@@ -118,10 +122,10 @@ void retro_set_environment(retro_environment_t cb)
    };
 
    static const struct retro_controller_info ports[] = {
-      { controllers, 2 },
-      { controllers, 2 },
-      { controllers, 2 },
-      { controllers, 2 },
+      { controllers, 3 },
+      { controllers, 3 },
+      { controllers, 3 },
+      { controllers, 3 },
       { NULL, 0 },
    };
 
@@ -177,29 +181,34 @@ static void update_digital_controller(int port)
    addkey(((KEY_PL1_JUMP + 0x10 * port) & 0x7fff) | ((jump != 0) ? 0x0 : 0x8000));
 }
 
+static unsigned char axis_range_modifier(int16_t value)
+{
+   return MIN(((value >> 8) + 128), 255) & 0xf0;
+}
+
 static void update_analog_controller(int port)
 {
    int left, right, jump;
 
-   const int16_t left_axis_x = input_state_cb(port, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X);
+   unsigned char left_axis_x = axis_range_modifier(input_state_cb(port, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X));
 
-   if (left_axis_x != 0) { // TODO add dead-zone ?
-      right = left_axis_x > 0;
-      left = left_axis_x < 0;
+   if (left_axis_x != 128) {
+      right = left_axis_x > 128;
+      left = left_axis_x < 128;
    }
 
    if (supports_input_bitmasks)
    {
-      const int16_t active = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
-      if (left_axis_x == 0) {
-         left = (active & (1 << RETRO_DEVICE_ID_JOYPAD_LEFT));
-         right = (active & (1 << RETRO_DEVICE_ID_JOYPAD_RIGHT));
+      const int16_t state = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
+      if (left_axis_x == 128) {
+         left = (state & (1 << RETRO_DEVICE_ID_JOYPAD_LEFT));
+         right = (state & (1 << RETRO_DEVICE_ID_JOYPAD_RIGHT));
       }
-      jump = (active & (1 << RETRO_DEVICE_ID_JOYPAD_A));
+      jump = (state & (1 << RETRO_DEVICE_ID_JOYPAD_A));
    }
    else
    {
-      if (left_axis_x == 0) {
+      if (left_axis_x == 128) {
          left = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT);
          right = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT);
       }
