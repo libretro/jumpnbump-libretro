@@ -60,7 +60,6 @@ void retro_deinit(void)
 {
    free(frame_buf);
    frame_buf = NULL;
-   deinit_program();
 }
 
 unsigned retro_api_version(void)
@@ -269,8 +268,7 @@ void retro_run(void)
       menu_init();
       game_state = GAME_STATE_MENU;
    }
-
-   if (game_state == GAME_STATE_MENU)
+   else if (game_state == GAME_STATE_MENU)
    {
       menu_frame();
    }
@@ -322,8 +320,8 @@ bool retro_load_game(const struct retro_game_info *info)
    datafile_buffer = (unsigned char *) malloc(info->size);
    memcpy(datafile_buffer, info->data, info->size);
 
-   game_state = GAME_STATE_BOOT;
    init_program();
+   game_state = GAME_STATE_BOOT;
 
    return true;
 }

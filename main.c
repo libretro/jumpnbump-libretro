@@ -419,7 +419,12 @@ int init_program(void)
 }
 
 void deinit_program(void)
-{
+{	
+	free_gob(&rabbit_gobs);
+	free_gob(&object_gobs);
+	free_gob(&font_gobs);
+	free_gob(&number_gobs);
+
 	dj_stop();
 	dj_free_mod(MOD_MENU);
 	dj_free_mod(MOD_GAME);

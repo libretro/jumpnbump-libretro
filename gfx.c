@@ -544,18 +544,8 @@ int read_pcx(unsigned char * handle, void *buf, int buf_len, char *pal)
 
 void register_background(unsigned char *pixels, char pal[768])
 {
-	if (background) {
-		free(background);
-		background = NULL;
-	}
 	background_drawn = 0;
-	if (!pixels)
-		return;
-	assert(pal);
-
-	background = malloc(JNB_WIDTH*JNB_HEIGHT);
-	assert(background);
-	memcpy(background, pixels, JNB_WIDTH*JNB_HEIGHT);
+	background = pixels;
 }
 
 int register_gob(unsigned char *handle, gob_t *gob, int len)
@@ -594,14 +584,21 @@ int register_gob(unsigned char *handle, gob_t *gob, int len)
 	return 0;
 }
 
+void free_gob(gob_t *gob)
+{
+	int i;
+	free(gob->width);
+	free(gob->height);
+	free(gob->hs_x);
+	free(gob->hs_y);
+	free(gob->data);
+	for (i=0; i<gob->num_images; i++) {
+		free(gob->orig_data[i]);
+	}
+	free(gob->orig_data);
+}
+
 void register_mask(void *pixels)
 {
-	if (mask) {
-		free(mask);
-		mask = NULL;
-	}
-	assert(pixels);
-	mask = malloc(JNB_WIDTH*JNB_HEIGHT);
-	assert(mask);
-	memcpy(mask, pixels, JNB_WIDTH*JNB_HEIGHT);
+	mask = pixels;
 }
