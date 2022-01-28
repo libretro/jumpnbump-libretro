@@ -27,7 +27,9 @@ static retro_audio_sample_batch_t audio_batch_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
-static int game_state = 0;
+#define GAME_STATE_MENU 0
+static int game_state;
+
 static int controller_types[4];
 static bool supports_input_bitmasks;
 
@@ -252,19 +254,15 @@ static void audio_callback(void)
    audio_batch_cb(0, 0);
 }
 
-static void render(void)
-{
-   if (game_state == 0)
-      menu_frame();
-
-   video_cb(frame_buf, JNB_WIDTH, JNB_HEIGHT, JNB_WIDTH << 2);
-}
-
 void retro_run(void)
 {
    update_input();
-   render();
    audio_callback();
+
+   if (game_state == GAME_STATE_MENU)
+      menu_frame();
+
+   video_cb(frame_buf, JNB_WIDTH, JNB_HEIGHT, JNB_WIDTH << 2);
 
    bool updated = false;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
@@ -314,7 +312,7 @@ bool retro_load_game(const struct retro_game_info *info)
    if (menu_init() != 0)
       return false;
 
-   game_state = 0;
+   game_state = GAME_STATE_MENU;
 
    return true;
 }
