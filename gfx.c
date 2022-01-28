@@ -221,7 +221,7 @@ void fillpalette(int red, int green, int blue)
 	assert(drawing_enable==0);
 
 	for (int i = 0; i < 256; i++)
-		current_palette[i] = ((red >> 3) & 0x1f) << 11 | ((green >> 2) & 0x3f) << 5 | ((blue >> 3) & 0x1f);
+		current_palette[i] = ((red >> 1) & 0x1f) << 11 | (green & 0x3f) << 5 | ((blue >> 1) & 0x1f);
 }
 
 
