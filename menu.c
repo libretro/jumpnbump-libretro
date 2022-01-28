@@ -143,6 +143,8 @@ int menu_init(void)
 int menu_frame()
 {
     int c1;
+
+    update_player_actions();
     
     for (c1 = 0; c1 < JNB_MAX_PLAYERS; c1++) {
         if (end_loop_flag == 1 && new_game_flag == 1) {

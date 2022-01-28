@@ -231,8 +231,6 @@ static void update_input(void)
             break;
       }
    }
-
-	update_player_actions();
 }
 
 static void check_variables(void)
