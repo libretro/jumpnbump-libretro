@@ -65,6 +65,7 @@ extern int screen_height;
 extern int screen_pitch;
 
 extern int ai[JNB_MAX_PLAYERS];
+extern unsigned char *datafile_buffer;
 
 #define KEY_PL1_LEFT	0xa0
 #define KEY_PL1_RIGHT	0xa1
@@ -231,7 +232,7 @@ int add_leftovers(int page, int x, int y, int image, gob_t *pob_data);
 void draw_leftovers(int page);
 int init_level(int level, char *pal);
 void deinit_level(void);
-int init_program(const void *data, size_t size);
+int init_program(void);
 void deinit_program(void);
 unsigned short rnd(unsigned short max);
 int read_level(void);

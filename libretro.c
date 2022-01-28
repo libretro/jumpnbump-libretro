@@ -27,8 +27,10 @@ static retro_audio_sample_batch_t audio_batch_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
-#define GAME_STATE_MENU 0
-#define GAME_STATE_GAME 1
+#define GAME_STATE_BOOT 0
+#define GAME_STATE_MENU 1
+#define GAME_STATE_GAME 2
+
 static int game_state;
 
 static int controller_types[4];
@@ -159,6 +161,7 @@ void retro_set_video_refresh(retro_video_refresh_t cb)
 
 void retro_reset(void)
 {
+   game_state = GAME_STATE_BOOT;
 }
 
 static void update_digital_controller(int port)
@@ -260,8 +263,17 @@ void retro_run(void)
    update_input();
    audio_callback();
 
+   if (game_state == GAME_STATE_BOOT)
+   {
+      init_program();
+      menu_init();
+      game_state = GAME_STATE_MENU;
+   }
+
    if (game_state == GAME_STATE_MENU)
+   {
       menu_frame();
+   }
 
    video_cb(frame_buf, JNB_WIDTH, JNB_HEIGHT, JNB_WIDTH << 1);
 
@@ -307,19 +319,17 @@ bool retro_load_game(const struct retro_game_info *info)
 
    check_variables();
 
-   if (init_program(info->data, info->size) != 0)
-      return false;
+   datafile_buffer = (unsigned char *) malloc(info->size);
+   memcpy(datafile_buffer, info->data, info->size);
 
-   if (menu_init() != 0)
-      return false;
-
-   game_state = GAME_STATE_MENU;
+   game_state = GAME_STATE_BOOT;
 
    return true;
 }
 
 void retro_unload_game(void)
 {
+   free(datafile_buffer);
 }
 
 unsigned retro_get_region(void)

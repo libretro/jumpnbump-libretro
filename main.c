@@ -229,7 +229,7 @@ void add_object(int type, int x, int y, int x_add, int y_add, int anim, int fram
 	}
 }
 
-int init_program(const void *data, size_t size)
+int init_program(void)
 {
 	unsigned char *handle = (unsigned char *) NULL;
 	int c1 = 0, c2 = 0;
@@ -250,9 +250,6 @@ int init_program(const void *data, size_t size)
 		return 1;
 
 	memset(&main_info, 0, sizeof(main_info));
-
-    datafile_buffer = (unsigned char *) malloc(size);
-    memcpy(datafile_buffer, data, size);
 
 #if 0
 /** It should not be necessary to assign a default player number here. The
