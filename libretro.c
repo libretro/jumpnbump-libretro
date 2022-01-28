@@ -17,7 +17,7 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
-uint32_t *frame_buf;
+uint16_t *frame_buf;
 
 static struct retro_log_callback logging;
 static retro_log_printf_t log_cb;
@@ -28,6 +28,7 @@ static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
 #define GAME_STATE_MENU 0
+#define GAME_STATE_GAME 1
 static int game_state;
 
 static int controller_types[4];
@@ -44,7 +45,7 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 
 void retro_init(void)
 {
-   frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint32_t));
+   frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint16_t));
 
    unsigned dummy = 0;
    supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, &dummy);
@@ -262,7 +263,7 @@ void retro_run(void)
    if (game_state == GAME_STATE_MENU)
       menu_frame();
 
-   video_cb(frame_buf, JNB_WIDTH, JNB_HEIGHT, JNB_WIDTH << 2);
+   video_cb(frame_buf, JNB_WIDTH, JNB_HEIGHT, JNB_WIDTH << 1);
 
    bool updated = false;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
@@ -270,7 +271,7 @@ void retro_run(void)
 }
 
 bool retro_load_game(const struct retro_game_info *info)
-{
+{   
    struct retro_input_descriptor desc[] = {
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
@@ -297,10 +298,10 @@ bool retro_load_game(const struct retro_game_info *info)
 
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
-   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
+   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {
-      log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported.\n");
+      log_cb(RETRO_LOG_INFO, "RGB565 is not supported.\n");
       return false;
    }
 

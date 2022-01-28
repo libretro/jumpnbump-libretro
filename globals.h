@@ -43,8 +43,6 @@ extern "C" {
 #include <math.h>
 #include "dj.h"
 
-extern uint32_t *frame_buf;
-
 #define JNB_MAX_PLAYERS 4
 
 #define JNB_END_SCORE 100
