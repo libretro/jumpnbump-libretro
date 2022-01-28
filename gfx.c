@@ -27,14 +27,10 @@
 
 #include "globals.h"
 
-int screen_width=400;
-int screen_height=256;
-int screen_pitch=400;
 int dirty_block_shift=4;
 
-static int vinited = 0;
-static void *screen_buffer[2];
-static void *jnb_surface;
+static uint8_t screen_buffer[2][JNB_WIDTH*JNB_HEIGHT];
+static uint8_t jnb_surface[JNB_WIDTH*JNB_HEIGHT];
 static int drawing_enable = 0;
 static void *background = NULL;
 static int background_drawn;
@@ -48,28 +44,14 @@ unsigned char *get_vgaptr(int page, int x, int y)
 {
 	assert(drawing_enable==1);
 
-	return (unsigned char *)screen_buffer[page] + (y*screen_pitch)+(x);
+	return screen_buffer[page] + (y*JNB_WIDTH)+(x);
 }
 
 void open_screen(void)
 {
-	vinited = 1;
-
 	memset(dirty_blocks, 0, sizeof(dirty_blocks));
 	memset(current_palette, 0, sizeof(current_palette));
-
-	screen_buffer[0]=malloc(screen_width*screen_height);
-	screen_buffer[1]=malloc(screen_width*screen_height);
-
-	jnb_surface=malloc(screen_width*screen_height);
-/*
-	dirty_blocks[0]=malloc(sizeof(int)*25*16+1000);
-	dirty_blocks[1]=malloc(sizeof(int)*25*16+1000);
-*/
-
-	return;
 }
-
 
 void clear_page(int page, int color)
 {
@@ -81,8 +63,8 @@ void clear_page(int page, int color)
 	for (i=0; i<(25*16); i++)
 		dirty_blocks[page][i] = 1;
 
-	for (i=0; i<screen_height; i++)
-		for (j=0; j<screen_width; j++)
+	for (i=0; i<JNB_HEIGHT; i++)
+		for (j=0; j<JNB_WIDTH; j++)
 			*buf++ = color;
 }
 
@@ -94,9 +76,9 @@ void clear_lines(int page, int y, int count, int color)
 	assert(drawing_enable==1);
 
 	for (i=0; i<count; i++) {
-		if ((i+y)<screen_height) {
+		if ((i+y)<JNB_HEIGHT) {
 			unsigned char *buf = get_vgaptr(page, 0, i+y);
-			for (j=0; j<screen_width; j++)
+			for (j=0; j<JNB_WIDTH; j++)
 				*buf++ = color;
 		}
 	}
@@ -112,10 +94,10 @@ int get_pixel(int page, int x, int y)
 {
 	assert(drawing_enable==1);
 
-	assert(x<screen_width);
-	assert(y<screen_height);
+	assert(x<JNB_WIDTH);
+	assert(y<JNB_HEIGHT);
 
-	return *(unsigned char *)get_vgaptr(page, x, y);
+	return *get_vgaptr(page, x, y);
 }
 
 
@@ -123,12 +105,12 @@ void set_pixel(int page, int x, int y, int color)
 {
 	assert(drawing_enable==1);
 
-	assert(x<screen_width);
-	assert(y<screen_height);
+	assert(x<JNB_WIDTH);
+	assert(y<JNB_HEIGHT);
 
 	dirty_blocks[page][(y>>dirty_block_shift)*25+(x>>dirty_block_shift)] = 1;
 
-	*(unsigned char *)get_vgaptr(page, x, y) = color;
+	*get_vgaptr(page, x, y) = color;
 }
 
 
@@ -136,14 +118,12 @@ void flippage(int page)
 {
 	int x,y;
 	unsigned char *src;
-	unsigned char *dest;
 
 	assert(drawing_enable==0);
 
-	src=screen_buffer[page];
-	dest=jnb_surface;
+	src = screen_buffer[page];
 
-	for (y=0; y<screen_height; y++) {
+	for (y=0; y<JNB_HEIGHT; y++) {
 		for (x=0; x<25; x++) {
 			int count;
 			int test_x;
@@ -156,8 +136,8 @@ void flippage(int page)
 			}
 			if (count) {
 				memcpy(
-					&dest[y*screen_pitch+(x<<dirty_block_shift)],
-					&src [y*screen_pitch+(x<<dirty_block_shift)],
+					&jnb_surface[y*JNB_WIDTH+(x<<dirty_block_shift)],
+					&src [y*JNB_WIDTH+(x<<dirty_block_shift)],
 					((16<<dirty_block_shift)>>4)*count);
 			}
 			x = test_x;
@@ -166,10 +146,10 @@ void flippage(int page)
 	memset(&dirty_blocks[page], 0, sizeof(int)*25*16);
 
 	// convert jnb_surface to RETRO_PIXEL_FORMAT_RGB565
-	for(y=0; y<screen_height; y++) {
-		for(x=0; x<screen_width; x++) {
-			int p = dest[y*screen_pitch+x];
-			frame_buf[y*screen_pitch+x] = current_palette[p];
+	for(y=0; y<JNB_HEIGHT; y++) {
+		for(x=0; x<JNB_WIDTH; x++) {
+			int p = jnb_surface[y*JNB_WIDTH+x];
+			frame_buf[y*JNB_WIDTH+x] = current_palette[p];
 		}
 	}
 }
@@ -236,10 +216,10 @@ void get_block(int page, int x, int y, int width, int height, void *buffer)
 		x = 0;
 	if (y < 0)
 		y = 0;
-	if (y + height >= screen_height)
-		height = screen_height - y;
-	if (x + width >= screen_width)
-		width = screen_width - x;
+	if (y + height >= JNB_HEIGHT)
+		height = JNB_HEIGHT - y;
+	if (x + width >= JNB_WIDTH)
+		width = JNB_WIDTH - x;
 	if (width<=0)
 		return;
 	if(height<=0)
@@ -249,7 +229,7 @@ void get_block(int page, int x, int y, int width, int height, void *buffer)
 	buffer_ptr = (unsigned char *)buffer;
 	for (h = 0; h < height; h++) {
 		memcpy(buffer_ptr, vga_ptr, width);
-		vga_ptr += screen_pitch;
+		vga_ptr += JNB_WIDTH;
 		buffer_ptr += width;
 	}
 }
@@ -266,10 +246,10 @@ void put_block(int page, int x, int y, int width, int height, void *buffer)
 		x = 0;
 	if (y < 0)
 		y = 0;
-	if (y + height >= screen_height)
-		height = screen_height - y;
-	if (x + width >= screen_width)
-		width = screen_width - x;
+	if (y + height >= JNB_HEIGHT)
+		height = JNB_HEIGHT - y;
+	if (x + width >= JNB_WIDTH)
+		width = JNB_WIDTH - x;
 	if (width<=0)
 		return;
 	if(height<=0)
@@ -279,7 +259,7 @@ void put_block(int page, int x, int y, int width, int height, void *buffer)
 	buffer_ptr = (unsigned char *)buffer;
 	for (h = 0; h < height; h++) {
 		memcpy(vga_ptr, buffer_ptr, width);
-		vga_ptr += screen_pitch;
+		vga_ptr += JNB_WIDTH;
 		buffer_ptr += width;
 	}
 	width = ((x+width)>>dirty_block_shift) - (x>>dirty_block_shift) + 1;
@@ -445,9 +425,9 @@ void put_pob(int page, int x, int y, int image, gob_t *gob, int use_mask, void *
 	x -= gob->hs_x[image];
 	y -= gob->hs_y[image];
 
-	if ((x + width) <= 0 || x >= screen_width)
+	if ((x + width) <= 0 || x >= JNB_WIDTH)
 		return;
-	if ((y + height) <= 0 || y >= screen_height)
+	if ((y + height) <= 0 || y >= JNB_HEIGHT)
 		return;
 
 	pob_x = 0;
@@ -457,19 +437,19 @@ void put_pob(int page, int x, int y, int image, gob_t *gob, int use_mask, void *
 		draw_width += x;
 		x = 0;
 	}
-	if ((x + width) > screen_width)
-		draw_width -= x + width - screen_width;
+	if ((x + width) > JNB_WIDTH)
+		draw_width -= x + width - JNB_WIDTH;
 	if (y < 0) {
 		pob_y -= y;
 		draw_height += y;
 		y = 0;
 	}
-	if ((y + height) > screen_height)
-		draw_height -= y + height - screen_height;
+	if ((y + height) > JNB_HEIGHT)
+		draw_height -= y + height - JNB_HEIGHT;
 
 	vga_ptr = get_vgaptr(page, x, y);
 	pob_ptr = ((unsigned char *)gob->data[image]) + ((pob_y * width) + pob_x);
-	mask_ptr = ((unsigned char *)mask) + ((y * screen_pitch) + (x));
+	mask_ptr = ((unsigned char *)mask) + ((y * JNB_WIDTH) + (x));
 	for (c1 = 0; c1 < draw_height; c1++) {
 		for (c2 = 0; c2 < draw_width; c2++) {
 			colour = *mask_ptr;
@@ -484,8 +464,8 @@ void put_pob(int page, int x, int y, int image, gob_t *gob, int use_mask, void *
 			mask_ptr++;
 		}
 		pob_ptr += width - c2;
-		vga_ptr += (screen_width - c2);
-		mask_ptr += (screen_width - c2);
+		vga_ptr += (JNB_WIDTH - c2);
+		mask_ptr += (JNB_WIDTH - c2);
 	}
 	draw_width = ((x+draw_width)>>dirty_block_shift) - (x>>dirty_block_shift) + 1;
 	draw_height = ((y+draw_height)>>dirty_block_shift) - (y>>dirty_block_shift) + 1;

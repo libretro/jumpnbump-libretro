@@ -60,10 +60,6 @@ void tellServerPlayerMoved(int playerid, int movement_type, int newval);
 #define JNB_WIDTH 400
 #define JNB_HEIGHT 256
 
-extern int screen_width;
-extern int screen_height;
-extern int screen_pitch;
-
 extern int ai[JNB_MAX_PLAYERS];
 extern unsigned char *datafile_buffer;
 
@@ -153,7 +149,7 @@ typedef struct {
 			int back_buf_ofs;
 		} pobs[NUM_POBS];
 	} page_info[2];
-	void *pob_backbuf[2];
+	uint8_t pob_backbuf[2][JNB_WIDTH*JNB_HEIGHT];
 } main_info_t;
 
 typedef struct {
@@ -201,14 +197,14 @@ typedef struct {
 } mouse_t;
 
 extern main_info_t main_info;
-extern player_t player[JNB_MAX_PLAYERS];
-extern player_anim_t player_anims[7];
-extern object_t objects[NUM_OBJECTS];
+extern player_t player[];
+extern player_anim_t player_anims[];
+extern object_t objects[];
 extern joy_t joy;
 extern mouse_t mouse;
 
-extern unsigned char *background_pic;
-extern unsigned char *mask_pic;
+extern unsigned char background_pic[];
+extern unsigned char mask_pic[];
 
 extern gob_t rabbit_gobs;
 extern gob_t font_gobs;
@@ -282,8 +278,6 @@ void register_mask(void *pixels);
 
 extern char last_keys[50];
 
-int hook_keyb_handler(void);
-void remove_keyb_handler(void);
 int key_pressed(int key);
 int addkey(unsigned int key);
 

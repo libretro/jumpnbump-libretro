@@ -51,6 +51,7 @@ int menu_init(void)
 	unsigned char *handle;
 	int c1;
 
+	memset((void *) last_keys, 0, sizeof(last_keys));
 	fillpalette(0, 0, 0);
 
 	if ((handle = dat_open("menu.pcx")) == 0) {

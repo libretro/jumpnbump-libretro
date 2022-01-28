@@ -2,6 +2,7 @@
 #include <unistd.h>
 
 int flies_enabled = 1;
+int flip = 0;
 
 struct {
 	int x, y;
@@ -11,7 +12,6 @@ struct {
 	int back_defined[2];
 } flies[NUM_FLIES];
 
-int flip = 0;
 
 gob_t rabbit_gobs = { 0 };
 gob_t font_gobs = { 0 };
@@ -27,8 +27,8 @@ object_t objects[NUM_OBJECTS];
 
 unsigned char *datafile_buffer = NULL;
 
-unsigned char *background_pic;
-unsigned char *mask_pic;
+unsigned char background_pic[JNB_WIDTH*JNB_HEIGHT];
+unsigned char mask_pic[JNB_WIDTH*JNB_HEIGHT];
 char pal[768];
 
 int ai[JNB_MAX_PLAYERS];
@@ -246,24 +246,7 @@ int init_program(void)
 
 	srand(time(NULL));
 
-	if (hook_keyb_handler() != 0)
-		return 1;
-
 	memset(&main_info, 0, sizeof(main_info));
-
-#if 0
-/** It should not be necessary to assign a default player number here. The
-server assigns one in init_server, the client gets one assigned by the server,
-all provided the user didn't choose one on the commandline. */
-	if (is_net) {
-		if (client_player_num < 0)
-		        client_player_num = 0;
-		player[client_player_num].enabled = 1;
-	}
-#endif
-
-	main_info.pob_backbuf[0] = malloc(screen_pitch*screen_height);
-	main_info.pob_backbuf[1] = malloc(screen_pitch*screen_height);
 
 	for (c1 = 0; c1 < 7; c1++) {
 		player_anims[c1].num_frames = player_anim_data[c1 * 10];
@@ -288,7 +271,6 @@ all provided the user didn't choose one on the commandline. */
 		return 1;
 	}
 	if (register_gob(handle, &rabbit_gobs, dat_filelen("rabbit.gob"))) {
-		/* error */
 		return 1;
 	}
 
@@ -297,7 +279,6 @@ all provided the user didn't choose one on the commandline. */
 		return 1;
 	}
 	if (register_gob(handle, &object_gobs, dat_filelen("objects.gob"))) {
-		/* error */
 		return 1;
 	}
 
@@ -306,7 +287,6 @@ all provided the user didn't choose one on the commandline. */
 		return 1;
 	}
 	if (register_gob(handle, &font_gobs, dat_filelen("font.gob"))) {
-		/* error */
 		return 1;
 	}
 
@@ -315,7 +295,6 @@ all provided the user didn't choose one on the commandline. */
 		return 1;
 	}
 	if (register_gob(handle, &number_gobs, dat_filelen("numbers.gob"))) {
-		/* error */
 		return 1;
 	}
 
@@ -419,11 +398,6 @@ all provided the user didn't choose one on the commandline. */
 		dj_set_sfx_settings(SFX_FLY, &fly);
 	}
 
-	if ((background_pic = (unsigned char*)malloc(JNB_WIDTH*JNB_HEIGHT)) == NULL)
-		return 1;
-	if ((mask_pic = (unsigned char*)malloc(JNB_WIDTH*JNB_HEIGHT)) == NULL)
-		return 1;
-
 	memset(mask_pic, 0, JNB_WIDTH*JNB_HEIGHT);
 	register_mask(mask_pic);
 
@@ -442,6 +416,20 @@ all provided the user didn't choose one on the commandline. */
     }
 
 	return 0;
+}
+
+void deinit_program(void)
+{
+	dj_stop();
+	dj_free_mod(MOD_MENU);
+	dj_free_mod(MOD_GAME);
+	dj_free_mod(MOD_SCORES);
+	dj_free_sfx(SFX_DEATH);
+	dj_free_sfx(SFX_SPRING);
+	dj_free_sfx(SFX_SPLASH);
+	dj_free_sfx(SFX_FLY);
+	dj_free_sfx(SFX_JUMP);
+	dj_deinit();
 }
 
 unsigned short rnd(unsigned short max)

@@ -48,17 +48,6 @@ int addkey(unsigned int key)
 	return 0;
 }
 
-void remove_keyb_handler(void)
-{
-}
-
-int hook_keyb_handler(void)
-{
-	memset((void *) last_keys, 0, sizeof(last_keys));
-
-	return 0;
-}
-
 int key_pressed(int key)
 {
 	return keyb[(unsigned char) key];
