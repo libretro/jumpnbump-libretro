@@ -59,5 +59,6 @@ void processMovePacket(NetPacket *pkt);
 void processKillPacket(NetPacket *pkt);
 
 void tellServerPlayerMoved(int playerid, int movement_type, int newval);
+void serverSendKillPacket(int killer, int victim);
 
 #endif /* __NETWORK_H__ */

@@ -226,7 +226,7 @@ void redraw_flies_background(int page);
 void redraw_pob_backgrounds(int page);
 int add_leftovers(int page, int x, int y, int image, gob_t *pob_data);
 void draw_leftovers(int page);
-int init_level(int level, char *pal);
+int init_level(void);
 void deinit_level(void);
 int init_program(void);
 void deinit_program(void);
@@ -234,6 +234,8 @@ unsigned short rnd(unsigned short max);
 int read_level(void);
 unsigned char *dat_open(char *file_name);
 int dat_filelen(char *file_name);
+void game_init(void);
+void game_loop(void);
 
 
 /* input.c */

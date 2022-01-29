@@ -270,7 +270,16 @@ void retro_run(void)
    }
    else if (game_state == GAME_STATE_MENU)
    {
-      menu_frame();
+      if(menu_frame() == 1)
+      {
+         init_level();
+         game_init();
+         game_state = GAME_STATE_GAME;
+      }
+   }
+   else if (game_state == GAME_STATE_GAME)
+   {
+      game_loop();
    }
 
    video_cb(frame_buf, JNB_WIDTH, JNB_HEIGHT, JNB_WIDTH << 1);

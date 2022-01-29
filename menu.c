@@ -40,11 +40,11 @@ char *message[] = {
 
 #define NUM_MESSAGES (sizeof(message)/sizeof(char *))
 
-int mod_vol = 0, mod_fade_direction = 0;
-int fade_dir, fade_count;
-char fade_pal[48];
-int cur_message;
-int end_loop_flag, new_game_flag, fade_flag;
+static int mod_vol = 0, mod_fade_direction = 0;
+static int fade_dir, fade_count;
+static char fade_pal[48];
+static int cur_message;
+static int end_loop_flag, new_game_flag, fade_flag;
 
 int menu_init(void)
 {
@@ -485,13 +485,12 @@ int menu_frame()
             fade_flag = 2;
         }
     }
+    
     if (fade_flag == 0 && end_loop_flag == 1) {
         menu_deinit();
-        if (new_game_flag == 1)
-            return 0;
-        else
-            return 1;
+        return new_game_flag;
     }
+
     switch (fade_dir) {
     case 0:
         if (fade_count < 30) {
