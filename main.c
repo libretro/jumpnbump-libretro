@@ -571,7 +571,6 @@ int init_level()
 	return 0;
 }
 
-
 void deinit_level(void)
 {
 	dj_set_nosound(1);
@@ -659,11 +658,6 @@ static void update_flies(void)
 			s4 = 0;
 		flies[c1].y += s4;
 	}
-}
-
-static void check_cheats(void)
-{
-
 }
 
 static void player_kill(int c1, int c2)
@@ -757,6 +751,96 @@ static int fade_flag = 0;
 static int update_palette = 0;
 static int mod_fade_direction;
 
+void end_game(void)
+{
+	int c1, c2;
+	unsigned char *handle;
+	
+	main_info.view_page = 0;
+	main_info.draw_page = 1;
+
+	dj_stop_sfx_channel(4);
+
+	deinit_level();
+
+	memset(mask_pic, 0, JNB_WIDTH*JNB_HEIGHT);
+	register_mask(mask_pic);
+
+	register_background(NULL, NULL);
+
+	draw_begin();
+
+	put_text(main_info.view_page, 100, 50, "DOTT", 2);
+	put_text(main_info.view_page, 160, 50, "JIFFY", 2);
+	put_text(main_info.view_page, 220, 50, "FIZZ", 2);
+	put_text(main_info.view_page, 280, 50, "MIJJI", 2);
+	put_text(main_info.view_page, 40, 80, "DOTT", 2);
+	put_text(main_info.view_page, 40, 110, "JIFFY", 2);
+	put_text(main_info.view_page, 40, 140, "FIZZ", 2);
+	put_text(main_info.view_page, 40, 170, "MIJJI", 2);
+
+	for (c1 = 0; c1 < JNB_MAX_PLAYERS; c1++) {
+		if (!player[c1].enabled) {
+			continue;
+		}
+		char str1[100];
+
+		for (c2 = 0; c2 < JNB_MAX_PLAYERS; c2++) {
+			if (!player[c2].enabled) {
+				continue;
+			}
+			if (c2 != c1) {
+				sprintf(str1, "%d", player[c1].bumped[c2]);
+				put_text(main_info.view_page, 100 + c2 * 60, 80 + c1 * 30, str1, 2);
+			} else
+				put_text(main_info.view_page, 100 + c2 * 60, 80 + c1 * 30, "-", 2);
+		}
+		sprintf(str1, "%d", player[c1].bumps);
+		put_text(main_info.view_page, 350, 80 + c1 * 30, str1, 2);
+	}
+
+	put_text(main_info.view_page, 200, 230, "Press ESC to continue", 2);
+
+	draw_end();
+
+	flippage(main_info.view_page);
+
+	/* fix dark font */
+	for (c1 = 0; c1 < 16; c1++) {
+		pal[(240 + c1) * 3 + 0] = c1 << 2;
+		pal[(240 + c1) * 3 + 1] = c1 << 2;
+		pal[(240 + c1) * 3 + 2] = c1 << 2;
+	}
+
+	memset(cur_pal, 0, 768);
+
+	setpalette(0, 256, cur_pal);
+
+	mod_vol = 0;
+	dj_ready_mod(MOD_SCORES);
+	dj_set_mod_volume((char)mod_vol);
+	dj_start_mod();
+	dj_set_nosound(0);
+}
+
+
+int end_loop(void)
+{
+	int c1;
+
+	if (mod_vol < 35)
+		mod_vol++;
+	dj_set_mod_volume((char)mod_vol);
+	for (c1 = 0; c1 < 768; c1++) {
+		if (cur_pal[c1] < pal[c1])
+			cur_pal[c1]++;
+	}
+	setpalette(0, 256, cur_pal);
+	flippage(main_info.view_page);
+
+	return key_pressed(1);
+}
+
 void game_init(void) {
 	int s1, s2;
 	int c1;
@@ -796,6 +880,7 @@ void game_init(void) {
 	main_info.draw_page = 1;
 
 	mod_vol = sfx_vol = 0;
+	end_loop_flag = 0;
 	mod_fade_direction = 1;
 	dj_ready_mod(MOD_GAME);
 	dj_set_mod_volume((char)mod_vol);
@@ -805,7 +890,7 @@ void game_init(void) {
 	endscore_reached = 0;
 }
 
-void game_loop(void) {
+int game_loop(void) {
 
 	int i, c2;
 
@@ -814,8 +899,6 @@ void game_loop(void) {
 		memset(pal, 0, 768);
 		mod_fade_direction = 0;
 	}
-
-	check_cheats();
 
 	steer_players();
 
@@ -886,7 +969,7 @@ void game_loop(void) {
 		update_palette = 1;
 
 	if (fade_flag == 0 && end_loop_flag == 1)
-		return;
+		return 1;
 
 	if (update_palette == 1) {
 		setpalette(0, 256, cur_pal);
@@ -908,6 +991,8 @@ void game_loop(void) {
 	draw_leftovers(main_info.draw_page);
 
 	draw_end();
+
+	return 0;
 }
 
 unsigned short rnd(unsigned short max)

@@ -488,7 +488,7 @@ int menu_frame()
     
     if (fade_flag == 0 && end_loop_flag == 1) {
         menu_deinit();
-        return new_game_flag;
+        return 1;
     }
 
     switch (fade_dir) {

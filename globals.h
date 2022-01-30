@@ -228,6 +228,8 @@ int add_leftovers(int page, int x, int y, int image, gob_t *pob_data);
 void draw_leftovers(int page);
 int init_level(void);
 void deinit_level(void);
+void end_game(void);
+int end_loop(void);
 int init_program(void);
 void deinit_program(void);
 unsigned short rnd(unsigned short max);
@@ -235,7 +237,7 @@ int read_level(void);
 unsigned char *dat_open(char *file_name);
 int dat_filelen(char *file_name);
 void game_init(void);
-void game_loop(void);
+int game_loop(void);
 
 
 /* input.c */

@@ -30,6 +30,7 @@ static retro_input_state_t input_state_cb;
 #define GAME_STATE_BOOT 0
 #define GAME_STATE_MENU 1
 #define GAME_STATE_GAME 2
+#define GAME_STATE_END  3
 
 static int game_state;
 
@@ -246,6 +247,9 @@ static void update_input(void)
             break;
       }
    }
+
+   int esc_pressed = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START);
+   addkey((1 & 0x7fff) | ((esc_pressed != 0) ? 0x0 : 0x8000));
 }
 
 static void check_variables(void)
@@ -279,7 +283,18 @@ void retro_run(void)
    }
    else if (game_state == GAME_STATE_GAME)
    {
-      game_loop();
+      if(game_loop() == 1)
+      {
+         end_game();
+         game_state = GAME_STATE_END;
+      }
+   }
+   else if (game_state == GAME_STATE_END)
+   {
+      if(end_loop() == 1)
+      {
+         game_state = GAME_STATE_BOOT;
+      }
    }
 
    video_cb(frame_buf, JNB_WIDTH, JNB_HEIGHT, JNB_WIDTH << 1);
