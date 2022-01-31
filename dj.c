@@ -280,22 +280,22 @@ void dj_set_sfx_volume(char volume)
 
 void dj_play_sfx(unsigned char sfx_num, unsigned short freq, char volume, char panning, unsigned short delay, char channel)
 {
-	int slot;
+	// int slot;
 
-	if (main_info.music_no_sound || main_info.no_sound)
-		return;
+	// if (main_info.music_no_sound || main_info.no_sound)
+	// 	return;
 
-	if (channel<0) {
-		for (slot=0; slot<MAX_CHANNELS; slot++)
-			if (channelinfo[slot].data==NULL)
-				break;
-		if (slot>=MAX_CHANNELS)
-			return;
-	} else
-		slot = channel;
+	// if (channel<0) {
+	// 	for (slot=0; slot<MAX_CHANNELS; slot++)
+	// 		if (channelinfo[slot].data==NULL)
+	// 			break;
+	// 	if (slot>=MAX_CHANNELS)
+	// 		return;
+	// } else
+	// 	slot = channel;
 
-	addsfx((short *)sounds[sfx_num].buf, sounds[sfx_num].length, sounds[sfx_num].loop, freq, slot);
-	updateSoundParams(slot, volume*2);
+	// addsfx((short *)sounds[sfx_num].buf, sounds[sfx_num].length, sounds[sfx_num].loop, freq, slot);
+	// updateSoundParams(slot, volume*2);
 }
 
 char dj_get_sfx_settings(unsigned char sfx_num, sfx_data *data)
