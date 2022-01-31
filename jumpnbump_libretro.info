@@ -20,6 +20,6 @@ supports_no_game = "false"
 hw_render = "false"
 needs_fullpath = "false"
 disk_control = "false"
-is_experimental = "true"
+is_experimental = "false"
 
 description = "Jump 'n Bump has no plot, other than that it involves up to four rabbits in multiplayer deathmatch: Dott, Jiffy, Fizz, and Mijji, trying to hop onto each other's heads to squish each other and score a point, while sending gibs flying everywhere. The rabbits are controlled by players on the same computer, using the keyboard, mouse, and/or joystick."
