@@ -57,16 +57,12 @@ void retro_init(void)
    for (int port = 0; port < 4; port++) {
       controller_types[port] = -1;
    }
-
-   dj_init();
 }
 
 void retro_deinit(void)
 {
    free(frame_buf);
    frame_buf = NULL;
-
-   dj_deinit();
 }
 
 unsigned retro_api_version(void)
