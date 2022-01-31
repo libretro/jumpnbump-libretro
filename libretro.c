@@ -12,6 +12,7 @@
 #include "libretro.h"
 
 #include "globals.h"
+#include "micromod.h"
 
 #ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -267,6 +268,7 @@ static unsigned char audio_buffer[735 * 4];
 static void audio_callback(void)
 {
    memset(audio_buffer, 0, 735 * 4);
+   micromod_get_audio((int16_t*) audio_buffer, 735);
    mix_sound((int16_t*) audio_buffer, 735 * 4);
    audio_batch_cb((int16_t*) audio_buffer, 735);
 }

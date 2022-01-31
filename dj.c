@@ -1,9 +1,8 @@
-#include "globals.h"
 #include <limits.h>
+#include "globals.h"
+#include "micromod.h"
 
 sfx_data sounds[NUM_SFX];
-
-static int SAMPLECOUNT = 735;
 
 #define MAX_CHANNELS	32
 
@@ -372,10 +371,32 @@ void dj_free_sfx(unsigned char sfx_num)
 
 char dj_ready_mod(char mod_num)
 {
+	unsigned char *fp;
+
     if (main_info.no_sound)
 		return 0;
+
+	switch (mod_num) {
+	case MOD_MENU:
+		fp = dat_open("jump.mod");
+		break;
+	case MOD_GAME:
+		fp = dat_open("bump.mod");
+		break;
+	case MOD_SCORES:
+		fp = dat_open("scores.mod");
+		break;
+	default:
+		fprintf(stderr, "bogus parameter to dj_ready_mod()\n");
+		fp = NULL;
+		break;
+	}
+
+	if (fp == NULL) {
+		return 0;
+	}
     
-	return 0;
+	return micromod_initialise((signed char*) fp, audio_rate);
 }
 
 char dj_start_mod(void)
@@ -396,6 +417,8 @@ void dj_set_mod_volume(char volume)
 {
 	if (main_info.no_sound)
 		return;
+
+	micromod_set_gain(volume);
 }
 
 char dj_load_mod(unsigned char * file_handle, char *filename, char mod_num)
