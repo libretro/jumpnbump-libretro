@@ -53,14 +53,19 @@ void retro_init(void)
    unsigned dummy = 0;
    supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, &dummy);
    
-   for (int port = 0; port < 4; port++)
+   for (int port = 0; port < 4; port++) {
       controller_types[port] = -1;
+   }
+
+   dj_init();
 }
 
 void retro_deinit(void)
 {
    free(frame_buf);
    frame_buf = NULL;
+
+   dj_deinit();
 }
 
 unsigned retro_api_version(void)
@@ -257,9 +262,13 @@ static void check_variables(void)
 
 }
 
+static unsigned char audio_buffer[735 * 4];
+
 static void audio_callback(void)
 {
-   audio_batch_cb(0, 0);
+   memset(audio_buffer, 0, 735 * 4);
+   mix_sound((int16_t*) audio_buffer, 735 * 4);
+   audio_batch_cb((int16_t*) audio_buffer, 735);
 }
 
 void retro_run(void)

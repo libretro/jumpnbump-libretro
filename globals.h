@@ -286,6 +286,8 @@ extern char last_keys[50];
 int key_pressed(int key);
 int addkey(unsigned int key);
 
+void mix_sound(signed short *stream, int len);
+
 
 #ifdef __cplusplus
 }
