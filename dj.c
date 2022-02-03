@@ -277,7 +277,7 @@ void dj_set_sfx_volume(char volume)
 	global_sfx_volume = volume*2;
 }
 
-void dj_play_sfx(unsigned char sfx_num, unsigned short freq, char volume, char panning, unsigned short delay, char channel)
+void dj_play_sfx(unsigned char sfx_num, unsigned short freq, char volume, char panning, unsigned short delay, int channel)
 {
 	int slot;
 
