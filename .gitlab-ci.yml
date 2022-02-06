@@ -8,7 +8,7 @@
 .core-defs:
   variables:
     JNI_PATH: .
-    CORENAME: mednafen_pce
+    CORENAME: jumpnbump
 
 # Inclusion templates, required for the build to work
 include:
