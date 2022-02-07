@@ -48,7 +48,7 @@ extern int server_said_bye;
 
 typedef struct
 {
-	u_int32_t cmd;
+	uint32_t cmd;
 	int32_t arg;
 	int32_t arg2;
 	int32_t arg3;
