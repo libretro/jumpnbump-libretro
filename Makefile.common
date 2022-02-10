@@ -1,4 +1,4 @@
-FLAGS := -Dstricmp=strcasecmp -Dstrnicmp=strncasecmp
+CORE_DEFINE := -Dstricmp=strcasecmp -Dstrnicmp=strncasecmp
 SOURCES_C   := $(CORE_DIR)/libretro.c \
                 $(CORE_DIR)/gfx.c \
                 $(CORE_DIR)/interrpt.c \
