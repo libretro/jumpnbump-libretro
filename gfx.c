@@ -183,11 +183,12 @@ void draw_end(void)
 
 void setpalette(int index, int count, char *palette)
 {
-	assert(drawing_enable==0);
-
+	int i;
 	uint8_t red, green, blue;
 
-	for (int i = 0; i < count; i++) {
+	assert(drawing_enable==0);
+
+	for (i = 0; i < count; i++) {
 		red = (palette[i * 3 + 0] >> 1) & 0x1f;
 		green = palette[i * 3 + 1] & 0x3f;
 		blue = (palette[i * 3 + 2] >> 1) & 0x1f;
@@ -198,9 +199,10 @@ void setpalette(int index, int count, char *palette)
 
 void fillpalette(int red, int green, int blue)
 {
+	int i;
 	assert(drawing_enable==0);
 
-	for (int i = 0; i < 256; i++)
+	for (i = 0; i < 256; i++)
 		current_palette[i] = ((red >> 1) & 0x1f) << 11 | (green & 0x3f) << 5 | ((blue >> 1) & 0x1f);
 }
 

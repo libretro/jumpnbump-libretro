@@ -1,7 +1,15 @@
+#ifdef _WIN32
+#include <direct.h>
+#else
 #include <unistd.h>
+#endif
 
 #include "globals.h"
 #include "network.h"
+
+#ifndef M_PI
+#define M_PI        3.14159265358979323846264338327950288
+#endif
 
 int flies_enabled = 1;
 int flip = 0;
@@ -780,10 +788,9 @@ void end_game(void)
 	put_text(main_info.view_page, 40, 170, "MIJJI", 2);
 
 	for (c1 = 0; c1 < JNB_MAX_PLAYERS; c1++) {
-		if (!player[c1].enabled) {
-			continue;
-		}
 		char str1[100];
+		if (!player[c1].enabled)
+			continue;
 
 		for (c2 = 0; c2 < JNB_MAX_PLAYERS; c2++) {
 			if (!player[c2].enabled) {
