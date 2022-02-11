@@ -36,11 +36,13 @@ static bool supports_input_bitmasks;
 
 void retro_init(void)
 {
+   int port;
+
    frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint16_t));
 
    supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL);
    
-   for (int port = 0; port < 4; port++) {
+   for (port = 0; port < 4; port++) {
       controller_types[port] = -1;
    }
 }
@@ -101,12 +103,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 }
 
 void retro_set_environment(retro_environment_t cb)
-{
-   environ_cb = cb;
-
-   if (cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &logging))
-      log_cb = logging.log;
-      
+{     
    static const struct retro_controller_description controllers[] = {
       { "Digital Controller (Gamepad)", RETRO_DEVICE_JOYPAD },
       { "Analog Controller (DualShock)", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_ANALOG, 0) },
@@ -120,6 +117,11 @@ void retro_set_environment(retro_environment_t cb)
       { controllers, 3 },
       { NULL, 0 },
    };
+
+   environ_cb = cb;
+
+   if (cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &logging))
+      log_cb = logging.log;
 
    cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
 }
@@ -215,9 +217,10 @@ static void update_analog_controller(int port)
 
 static void update_input(void)
 {
+   int esc_pressed, port;
    input_poll_cb();
 
-   for (int port = 0; port < 4; port++)
+   for (port = 0; port < 4; port++)
    {
       switch (controller_types[port])
       {
@@ -234,7 +237,7 @@ static void update_input(void)
       }
    }
 
-   int esc_pressed = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START);
+   esc_pressed = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START);
    addkey((1 & 0x7fff) | ((esc_pressed != 0) ? 0x0 : 0x8000));
 }
 
@@ -255,6 +258,8 @@ static void audio_callback(void)
 
 void retro_run(void)
 {
+   bool updated;
+
    update_input();
    audio_callback();
 
@@ -290,7 +295,7 @@ void retro_run(void)
 
    video_cb(frame_buf, JNB_WIDTH, JNB_HEIGHT, JNB_WIDTH << 1);
 
-   bool updated = false;
+   updated = false;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
       check_variables();
 }
@@ -320,10 +325,10 @@ bool retro_load_game(const struct retro_game_info *info)
 
       { 0 },
    };
+   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
 
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
-   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {
       log_cb(RETRO_LOG_INFO, "RGB565 is not supported.\n");
