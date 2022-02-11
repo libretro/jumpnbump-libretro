@@ -38,8 +38,7 @@ void retro_init(void)
 {
    frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint16_t));
 
-   unsigned dummy = 0;
-   supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, &dummy);
+   supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL);
    
    for (int port = 0; port < 4; port++) {
       controller_types[port] = -1;
