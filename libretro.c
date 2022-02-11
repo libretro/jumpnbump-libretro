@@ -34,15 +34,6 @@ static int game_state;
 static int controller_types[4];
 static bool supports_input_bitmasks;
 
-static void fallback_log(enum retro_log_level level, const char *fmt, ...)
-{
-   (void)level;
-   va_list va;
-   va_start(va, fmt);
-   vfprintf(stderr, fmt, va);
-   va_end(va);
-}
-
 void retro_init(void)
 {
    frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint16_t));
@@ -116,8 +107,6 @@ void retro_set_environment(retro_environment_t cb)
 
    if (cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &logging))
       log_cb = logging.log;
-   else
-      log_cb = fallback_log;
       
    static const struct retro_controller_description controllers[] = {
       { "Digital Controller (Gamepad)", RETRO_DEVICE_JOYPAD },
