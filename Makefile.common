@@ -1,4 +1,8 @@
+ifeq (,$(findstring msvc,$(platform)))
 CORE_DEFINE := -Dstricmp=strcasecmp -Dstrnicmp=strncasecmp
+else
+CORE_DEFINE :=
+endif
 SOURCES_C   := $(CORE_DIR)/libretro.c \
                 $(CORE_DIR)/gfx.c \
                 $(CORE_DIR)/interrpt.c \
