@@ -5,7 +5,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <stdio.h>
 #include "libretro.h"
 
 #include "globals.h"
