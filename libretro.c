@@ -30,8 +30,6 @@ static retro_input_state_t input_state_cb;
 #define GAME_STATE_END  3
 
 static int game_state;
-
-static int controller_types[4];
 static bool supports_input_bitmasks;
 
 void retro_init(void)
@@ -41,10 +39,6 @@ void retro_init(void)
    frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint16_t));
 
    supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL);
-   
-   for (port = 0; port < 4; port++) {
-      controller_types[port] = -1;
-   }
 }
 
 void retro_deinit(void)
@@ -64,22 +58,6 @@ void retro_set_controller_port_device(unsigned port, unsigned device)
       return;
 
    log_cb(RETRO_LOG_INFO, "Plugging device %u into port %u.\n", device, port);
-
-   switch (device)
-   {
-      case RETRO_DEVICE_JOYPAD:
-         controller_types[port] = 0;
-         break;
-
-      case RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_ANALOG, 0):
-         controller_types[port] = 1;
-         break;
-      
-      case RETRO_DEVICE_NONE:
-      default:
-         controller_types[port] = -1;
-         break;
-   }
 }
 
 void retro_get_system_info(struct retro_system_info *info)
@@ -104,26 +82,10 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 
 void retro_set_environment(retro_environment_t cb)
 {     
-   static const struct retro_controller_description controllers[] = {
-      { "Digital Controller (Gamepad)", RETRO_DEVICE_JOYPAD },
-      { "Analog Controller (DualShock)", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_ANALOG, 0) },
-      { NULL, 0 },
-   };
-
-   static const struct retro_controller_info ports[] = {
-      { controllers, 3 },
-      { controllers, 3 },
-      { controllers, 3 },
-      { controllers, 3 },
-      { NULL, 0 },
-   };
-
    environ_cb = cb;
 
    if (cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &logging))
       log_cb = logging.log;
-
-   cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb) { }
@@ -153,7 +115,14 @@ void retro_reset(void)
    game_state = GAME_STATE_BOOT;
 }
 
-static void update_digital_controller(int port)
+static unsigned char axis_range_modifier(int16_t value)
+{
+   return MIN(((value >> 8) + 128), 255) & 0xf0;
+}
+
+#define DEAD_ZONE        10
+
+static void update_controller(int port)
 {
    int left, right, jump;
 
@@ -171,43 +140,11 @@ static void update_digital_controller(int port)
       jump = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
    }
 
-   addkey(((KEY_PL1_LEFT + 0x10 * port) & 0x7fff) | ((left != 0) ? 0x0 : 0x8000));
-   addkey(((KEY_PL1_RIGHT + 0x10 * port) & 0x7fff) | ((right != 0) ? 0x0 : 0x8000));
-   addkey(((KEY_PL1_JUMP + 0x10 * port) & 0x7fff) | ((jump != 0) ? 0x0 : 0x8000));
-}
-
-static unsigned char axis_range_modifier(int16_t value)
-{
-   return MIN(((value >> 8) + 128), 255) & 0xf0;
-}
-
-static void update_analog_controller(int port)
-{
-   int left, right, jump;
-
-   unsigned char left_axis_x = axis_range_modifier(input_state_cb(port, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X));
-
-   if (left_axis_x != 128) {
-      right = left_axis_x > 128;
-      left = left_axis_x < 128;
-   }
-
-   if (supports_input_bitmasks)
+   if (left == 0 && right == 0) // check analog left stick
    {
-      const int16_t state = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
-      if (left_axis_x == 128) {
-         left = (state & (1 << RETRO_DEVICE_ID_JOYPAD_LEFT));
-         right = (state & (1 << RETRO_DEVICE_ID_JOYPAD_RIGHT));
-      }
-      jump = (state & (1 << RETRO_DEVICE_ID_JOYPAD_A));
-   }
-   else
-   {
-      if (left_axis_x == 128) {
-         left = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT);
-         right = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT);
-      }
-      jump = input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A);
+      unsigned char left_axis_x = axis_range_modifier(input_state_cb(port, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X));
+      right = left_axis_x > (128 + DEAD_ZONE);
+      left = left_axis_x < (128 - DEAD_ZONE);
    }
 
    addkey(((KEY_PL1_LEFT + 0x10 * port) & 0x7fff) | ((left != 0) ? 0x0 : 0x8000));
@@ -222,19 +159,7 @@ static void update_input(void)
 
    for (port = 0; port < 4; port++)
    {
-      switch (controller_types[port])
-      {
-         case 0:
-            update_digital_controller(port);
-            break;
-
-         case 1:
-            update_analog_controller(port);
-            break;
-         
-         default:
-            break;
-      }
+      update_controller(port);
    }
 
    esc_pressed = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START);
@@ -306,22 +231,22 @@ bool retro_load_game(const struct retro_game_info *info)
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-      { 0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Left Analog X"},
+      { 0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Left and Right"},
 
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-      { 1, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Left Analog X"},
+      { 1, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Left and Right"},
 
       { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
       { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
       { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-      { 2, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Left Analog X"},
+      { 2, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Left and Right"},
 
       { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
       { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
       { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-      { 3, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Left Analog X"},
+      { 3, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Left and Right"},
 
       { 0 },
    };
