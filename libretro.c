@@ -24,6 +24,15 @@ static retro_audio_sample_batch_t audio_batch_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
+extern int flies_enabled;
+extern int flip;
+
+static const struct retro_variable var_jnb_flip    = { "jnb-flip", "Flip Level; OFF|ON" };
+static const struct retro_variable var_jnb_flies   = { "jnb-flies", "Flies; OFF|ON" };
+
+static const struct retro_variable var_empty = { NULL, NULL };
+
+
 #define GAME_STATE_BOOT 0
 #define GAME_STATE_MENU 1
 #define GAME_STATE_GAME 2
@@ -39,6 +48,13 @@ void retro_init(void)
    frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint16_t));
 
    supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL);
+
+   // Add the System core options
+   struct retro_variable vars[3];
+   vars[0] = var_jnb_flip;
+   vars[1] = var_jnb_flies;
+   vars[2] = var_empty;
+   environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars);
 }
 
 void retro_deinit(void)
@@ -168,7 +184,33 @@ static void update_input(void)
 
 static void check_variables(void)
 {
+   struct retro_variable var = { 0 };
 
+   var.key = var_jnb_flip.key;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var))
+   {
+      if (strcmp(var.value, "OFF") == 0)
+      {
+         flip = 0;
+      }
+      else
+      {
+         flip = 1;
+      }
+   }
+
+   var.key = var_jnb_flies.key;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var))
+   {
+      if (strcmp(var.value, "OFF") == 0)
+      {
+         flies_enabled = 0;
+      }
+      else
+      {
+         flies_enabled = 1;
+      }
+   }
 }
 
 static unsigned char audio_buffer[735 * 4];
@@ -222,7 +264,13 @@ void retro_run(void)
 
    updated = false;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
+   {
       check_variables();
+      if (game_state == GAME_STATE_GAME) {
+         // need to restart
+         game_state = GAME_STATE_BOOT;
+      }
+   }
 }
 
 bool retro_load_game(const struct retro_game_info *info)

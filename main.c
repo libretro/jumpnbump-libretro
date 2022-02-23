@@ -11,7 +11,7 @@
 #define M_PI        3.14159265358979323846264338327950288
 #endif
 
-int flies_enabled = 1;
+int flies_enabled = 0;
 int flip = 0;
 
 struct {
@@ -321,11 +321,6 @@ int init_program(void)
 		return 1;
 	}
 
-	if (read_level() != 0) {
-		strcpy(main_info.error_str, "Error loading 'levelmap.txt', aborting...\n");
-		return 1;
-	}
-
 	open_screen();
 	dj_init();
 
@@ -508,6 +503,7 @@ int init_level()
 	}
 	if (flip)
 		flip_pixels(background_pic);
+
 	if ((handle = dat_open("mask.pcx")) == 0) {
 		strcpy(main_info.error_str, "Error loading 'mask.pcx', aborting...\n");
 		return 1;
@@ -518,8 +514,12 @@ int init_level()
 	}
 	if (flip)
 		flip_pixels(mask_pic);
-	register_mask(mask_pic);
 
+	if (read_level() != 0) {
+		strcpy(main_info.error_str, "Error loading 'levelmap.txt', aborting...\n");
+		return 1;
+	}
+	
 	for (c1 = 0; c1 < JNB_MAX_PLAYERS; c1++) {
 		if (player[c1].enabled == 1) {
 			player[c1].bumps = 0;
