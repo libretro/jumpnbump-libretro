@@ -44,13 +44,12 @@ static bool supports_input_bitmasks;
 void retro_init(void)
 {
    int port;
+   struct retro_variable vars[3];
 
    frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint16_t));
-
    supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL);
 
    // Add the System core options
-   struct retro_variable vars[3];
    vars[0] = var_jnb_flip;
    vars[1] = var_jnb_flies;
    vars[2] = var_empty;
