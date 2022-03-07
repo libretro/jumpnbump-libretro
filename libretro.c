@@ -5,6 +5,10 @@
 #include <string.h>
 #include <math.h>
 
+#if defined(_WIN32) && !defined(_XBOX)
+#include <windows.h>
+#endif
+
 #include "libretro.h"
 
 #include "globals.h"
