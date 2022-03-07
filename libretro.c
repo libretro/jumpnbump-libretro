@@ -16,7 +16,6 @@
 
 uint16_t *frame_buf;
 
-static retro_log_printf_t log_cb;
 static retro_environment_t environ_cb;
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
@@ -40,29 +39,13 @@ static const struct retro_variable var_empty = { NULL, NULL };
 static int game_state;
 static bool supports_input_bitmasks;
 
-static void fallback_log(enum retro_log_level level, const char *fmt, ...)
-{
-   (void)level;
-   va_list va;
-   va_start(va, fmt);
-   vfprintf(stderr, fmt, va);
-   va_end(va);
-}
-
 void retro_init(void)
 {
    int port;
    struct retro_variable vars[3];
-   struct retro_log_callback logging;
 
    frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint16_t));
    supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL);
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &logging)) {
-      log_cb = logging.log;
-   } else {
-      log_cb = fallback_log;
-   }
 
    // Add the System core options
    vars[0] = var_jnb_flip;
@@ -82,13 +65,7 @@ unsigned retro_api_version(void)
    return RETRO_API_VERSION;
 }
 
-void retro_set_controller_port_device(unsigned port, unsigned device)
-{
-   if (port >= 4)
-      return;
-
-   log_cb(RETRO_LOG_INFO, "Plugging device %u into port %u.\n", device, port);
-}
+void retro_set_controller_port_device(unsigned port, unsigned device) { }
 
 void retro_get_system_info(struct retro_system_info *info)
 {
@@ -304,7 +281,6 @@ bool retro_load_game(const struct retro_game_info *info)
 
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {
-      log_cb(RETRO_LOG_INFO, "RGB565 is not supported.\n");
       return false;
    }
 
