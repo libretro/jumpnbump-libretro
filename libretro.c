@@ -41,9 +41,7 @@ static bool supports_input_bitmasks;
 
 void retro_init(void)
 {
-   struct retro_variable vars[] = {
-      var_jnb_flip, var_jnb_flies, var_empty
-   };
+   struct retro_variable vars[3];
    struct retro_input_descriptor desc[] = {
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
@@ -67,6 +65,10 @@ void retro_init(void)
    frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint16_t));
    supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL);
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
+
+   vars[0] = var_jnb_flip;
+   vars[1] = var_jnb_flies;
+   vars[2] = var_empty;
    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars);
 }
 
