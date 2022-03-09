@@ -41,16 +41,32 @@ static bool supports_input_bitmasks;
 
 void retro_init(void)
 {
-   int port;
-   struct retro_variable vars[3];
+   struct retro_variable vars[] = {
+      var_jnb_flip, var_jnb_flies, var_empty
+   };
+   struct retro_input_descriptor desc[] = {
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
+      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
+      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
+      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
+      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
+
+      { 0 },
+   };
 
    frame_buf = calloc(JNB_WIDTH * JNB_HEIGHT, sizeof(uint16_t));
    supports_input_bitmasks = environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL);
-
-   // Add the System core options
-   vars[0] = var_jnb_flip;
-   vars[1] = var_jnb_flies;
-   vars[2] = var_empty;
+   environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
    environ_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars);
 }
 
@@ -118,13 +134,6 @@ void retro_reset(void)
 {
    game_state = GAME_STATE_BOOT;
 }
-
-static unsigned char axis_range_modifier(int16_t value)
-{
-   return MIN(((value >> 8) + 128), 255) & 0xf0;
-}
-
-#define DEAD_ZONE        10
 
 static void update_controller(int port)
 {
@@ -194,14 +203,14 @@ static void check_variables(void)
    }
 }
 
-static unsigned char audio_buffer[735 * 4];
+static int16_t audio_buffer[735 * 2];
 
 static void audio_callback(void)
 {
-   memset(audio_buffer, 0, 735 * 4);
-   micromod_get_audio((int16_t*) audio_buffer, 735);
-   mix_sound((int16_t*) audio_buffer, 735 * 4);
-   audio_batch_cb((int16_t*) audio_buffer, 735);
+   memset((void*)audio_buffer, 0, 735 * 4);
+   micromod_get_audio(audio_buffer, 735);
+   mix_sound(audio_buffer, 735 * 4);
+   audio_batch_cb(audio_buffer, 735);
 }
 
 void retro_run(void)
@@ -256,28 +265,8 @@ void retro_run(void)
 
 bool retro_load_game(const struct retro_game_info *info)
 {   
-   struct retro_input_descriptor desc[] = {
-      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
-      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
-      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
 
-      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
-      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
-      { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-
-      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
-      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
-      { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-
-      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
-      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_A,     "Jump" },
-      { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-
-      { 0 },
-   };
    enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
-
-   environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {

@@ -875,8 +875,9 @@ void game_init(void) {
 		}
 	}
 
-	if (flies_enabled)
+	if (flies_enabled) {
 		dj_play_sfx(SFX_FLY, SFX_FLY_FREQ, 0, 0, 0, 4);
+	}
 
 	dj_set_nosound(0);
 

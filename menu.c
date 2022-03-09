@@ -123,6 +123,7 @@ int menu_init(void)
 	dj_set_sfx_volume(64);
 	dj_start_mod();
 	dj_set_nosound(0);
+	dj_stop_sfx_channel(4);
 
 	memset(fade_pal, 0, 48);
 	setpalette(240, 16, fade_pal);
