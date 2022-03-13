@@ -181,19 +181,18 @@ else ifeq ($(platform), libnx)
     CFLAGS += -std=gnu11
     STATIC_LINKING = 1
 
-# PS3
-else ifneq (,$(filter $(platform), psl1ght))
-   TARGET := $(TARGET_NAME)_libretro_ps3.a
-   STATIC_LINKING = 1
-   ENDIANNESS_DEFINES := -DMSB_FIRST -DBYTE_ORDER=BIG_ENDIAN -D__PSL1GHT__
-
-   # Lightweight PS3 Homebrew SDK
-   ifneq (,$(findstring psl1ght,$(platform)))
-      TARGET := $(TARGET_NAME)_libretro_$(platform).a
-      CC = $(PS3DEV)/ppu/bin/ppu-gcc$(EXE_EXT)
-      CXX = $(PS3DEV)/ppu/bin/ppu-g++$(EXE_EXT)
-      AR = $(PS3DEV)/ppu/bin/ppu-ar$(EXE_EXT)
-   endif
+# Lightweight PS3 Homebrew SDK
+else ifneq (,$(filter $(platform), ps3 psl1ght))
+	EXT=a
+	TARGET := $(TARGET_NAME)_libretro_$(platform).$(EXT)
+	CC = $(PS3DEV)/ppu/bin/ppu-$(COMMONLV)gcc$(EXE_EXT)
+	AR = $(PS3DEV)/ppu/bin/ppu-$(COMMONLV)ar$(EXE_EXT)
+	CFLAGS += -D__ppc__ -DMSB_FIRST -D__PS3__
+	STATIC_LINKING=1
+	STATIC_LINKING_LINK=1
+	ifeq ($(platform), psl1ght)
+		CFLAGS += -D__PSL1GHT__
+	endif
 
 # PSP
 else ifeq ($(platform), psp1)
@@ -274,16 +273,27 @@ else ifeq ($(platform), emscripten)
    TARGET := $(TARGET_NAME)_libretro_$(platform).bc
    STATIC_LINKING = 1
 
-# GCW Zero
 else ifeq ($(platform), gcw0)
    TARGET := $(TARGET_NAME)_libretro.so
    CC = /opt/gcw0-toolchain/usr/bin/mipsel-linux-gcc
    CXX = /opt/gcw0-toolchain/usr/bin/mipsel-linux-g++
    AR = /opt/gcw0-toolchain/usr/bin/mipsel-linux-ar
    fpic := -fPIC
-   SHARED := -shared -Wl,--no-undefined -Wl,--version-script=link.T
-   LDFLAGS += -lrt
-   FLAGS += -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float
+   SHARED := -shared -Wl,--no-undefined -Wl,-version-script=$(CORE_DIR)/link.T
+   FLAGS += -DDINGUX -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32r2 -mhard-float
+   WANT_BPP := 16
+
+# Miyoo
+else ifeq ($(platform), miyoo)
+   TARGET := $(TARGET_NAME)_libretro.so
+   CC = /opt/miyoo/usr/bin/arm-linux-gcc
+   CXX = /opt/miyoo/usr/bin/arm-linux-g++
+   AR = /opt/miyoo/usr/bin/arm-linux-ar
+   fpic := -fPIC
+   SHARED := -shared -Wl,--no-undefined -Wl,-version-script=$(CORE_DIR)/link.T
+   FLAGS += -fomit-frame-pointer -ffast-math -mcpu=arm926ej-s
+   WANT_BPP := 16
+
 
 # Windows MSVC 2017 all architectures
 else ifneq (,$(findstring windows_msvc2017,$(platform)))
