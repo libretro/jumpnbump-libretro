@@ -234,16 +234,16 @@ libretro-build-dingux-odbeta-mips32:
     - .core-defs
 
 # RS-90 OpenDingux Beta
-libretro-build-rs90-odbeta-mips32:
-  extends:
-    - .libretro-rs90-odbeta-mips32-make-default
-    - .core-defs
+# libretro-build-rs90-odbeta-mips32:
+#   extends:
+#     - .libretro-rs90-odbeta-mips32-make-default
+#     - .core-defs
     
 # RetroFW
-libretro-build-retrofw-mips32:
-  extends:
-    - .libretro-retrofw-mips32-make-default
-    - .core-defs
+# libretro-build-retrofw-mips32:
+#   extends:
+#     - .libretro-retrofw-mips32-make-default
+#     - .core-defs
 
 # Miyoo
 libretro-build-miyoo-arm32:
