@@ -40,6 +40,12 @@ static uint16_t current_palette[256];
 
 extern uint16_t *frame_buf;
 
+#if defined(ABGR1555)
+#define vRGB(r,g,b) ((((b) & 0x3e) << 9) | (((g) & 0x3e) << 5) | (((r) & 0x3e) >> 1)) | (1 << 15)
+#else
+#define vRGB(r,g,b) ((((r) & 0x3e) << 10) | (((g) & 0x3f) << 5) | (((b) & 0x3e) >> 1))
+#endif
+
 unsigned char *get_vgaptr(int page, int x, int y)
 {
 	assert(drawing_enable==1);
@@ -189,10 +195,10 @@ void setpalette(int index, int count, char *palette)
 	assert(drawing_enable==0);
 
 	for (i = 0; i < count; i++) {
-		red = (palette[i * 3 + 0] >> 1) & 0x1f;
-		green = palette[i * 3 + 1] & 0x3f;
-		blue = (palette[i * 3 + 2] >> 1) & 0x1f;
-		current_palette[index + i] = (red << 11 | green << 5 | blue);
+		red = palette[i * 3 + 0];
+		green = palette[i * 3 + 1];
+		blue = palette[i * 3 + 2];
+		current_palette[index + i] = vRGB(red, green, blue);
 	}
 }
 
@@ -203,7 +209,7 @@ void fillpalette(int red, int green, int blue)
 	assert(drawing_enable==0);
 
 	for (i = 0; i < 256; i++)
-		current_palette[i] = ((red >> 1) & 0x1f) << 11 | (green & 0x3f) << 5 | ((blue >> 1) & 0x1f);
+		current_palette[i] = vRGB(red, green, blue);
 }
 
 
@@ -537,7 +543,7 @@ int read_pcx(unsigned char * handle, void *buf, int buf_len, char *pal)
 		if (pal != 0) {
 			handle++;
 			for (c1 = 0; c1 < 768; c1++)
-				pal[c1] = *(handle++) /*fgetc(handle)*/ >> 2;
+				pal[c1] = *(handle++) >> 2;
 		}
 	}
 	return 0;
