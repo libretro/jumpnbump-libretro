@@ -41,7 +41,7 @@ static uint16_t current_palette[256];
 extern uint16_t *frame_buf;
 
 #if defined(ABGR1555)
-#define vRGB(r,g,b) ((((b) & 0x3e) << 9) | (((g) & 0x3e) << 5) | (((r) & 0x3e) >> 1) | (1 << 15))
+#define vRGB(r,g,b) ((((b) & 0x3e) << 9) | (((g) & 0x3e) << 4) | (((r) & 0x3e) >> 1))
 #else
 #define vRGB(r,g,b) ((((r) & 0x3e) << 10) | (((g) & 0x3f) << 5) | (((b) & 0x3e) >> 1))
 #endif
